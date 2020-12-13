@@ -316,7 +316,7 @@ def rdkit_2d_normalized_features_generator(smiles) -> np.ndarray:
     features = generator.process(smiles)[1:]
     return features
 
-dir = "/Users/E/Desktop/STUDY/CMU/Second_Year/Fall_2020/11685_Deep_Learning/Project/data/"
+dir = "/Project/data/"
 smile1 = "CC1Sc2c(C(O)=O)c(=O)c3cc(F)c(cc3n12)N1CCNCC1"
 smile2 = "Cl.N=C(N)n1cccn1"
 # vec_array = rdkit_2d_normalized_features_generator(smile2)
