@@ -7,9 +7,6 @@ from training import *
 from dataset import *
 import torch.optim as optim
 
-
-
-
 class SGC(nn.Module):
     """
     A Simple PyTorch Implementation of Logistic Regression.
@@ -60,6 +57,11 @@ if __name__ == '__main__':
     lr = 0.001
     wd = 5e-6
 
+    train_f = np.load("data/train_feature.npy", allow_pickle=True)
+    train_adj_mx = np.load("data/train_adjacent_matrix.npy", allow_pickle=True)
+    train_mol_f = np.load("data/train_mol_features.npy", allow_pickle=True)
+    train_label = np.load("data/train_label.npy", allow_pickle=True)
+
     SGC_base_list = []
     optimizer_list = []
     scheduler_list = []
@@ -87,8 +89,6 @@ if __name__ == '__main__':
                                                                               random_state=42)
 
     pos_X_set, neg_X_set = split_pos_neg(train_X_set, train_Y)  # Take all
-
-    print(pos_X_set.shape, neg_X_set.shape)
 
     for i in range(ensemble):
         # For each ensemble, pick all positive samples and same number of negative samples. (balanced 1:1)
