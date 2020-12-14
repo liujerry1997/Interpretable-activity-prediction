@@ -20,4 +20,7 @@ Two excutable jupyter notebooks for SGC model and SGC ensemble model are inside 
 
 # Result
 Please see detailed result in report.
+
 ![Alt text](https://github.com/liujerry1997/Interpretable-activity-prediction/blob/main/figure/Screen%20Shot%202020-12-13%20at%2016.22.59.png?raw=true")
+
+![Alt text](https://github.com/liujerry1997/Interpretable-activity-prediction/blob/main/figure/Screen%20Shot%202020-12-13%20at%2023.50.40.png?raw=true")
