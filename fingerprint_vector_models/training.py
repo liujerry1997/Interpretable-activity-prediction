@@ -6,6 +6,10 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import confusion_matrix
+
+
 def train(model, train_loader, optimizer, criterion, device, epoch, empty_cache=False):
     start = time.time()
     model.train()
@@ -83,43 +87,59 @@ def valid(model, val_loader, criterion, device, epoch, empty_cache=False):
 def test(model, test_loader, device, empty_cache):
     start = time.time()
     model.eval()
-    predicted_test = []
+    pred_label = []
+    true_label = []
     with torch.no_grad():
         for i, (x, y) in enumerate(test_loader):
             x = x.to(device)
+            y = y.to(device)
             output = model(x)
             predicted = torch.max(output.data, 1)[1]
-            predicted_test.extend(predicted.cpu().detach().numpy())
+            pred_label.extend(predicted.detach().cpu().numpy())
+            true_label.extend(y.detach().cpu().numpy())
             
             if empty_cache:
                 torch.cuda.empty_cache()
                 del x
+                del y
     
+    true_label = np.array(true_label)
+    pred_label = np.array(pred_label)
+    accuracy = np.mean(true_label == pred_label)
+    auc = roc_auc_score(true_label, pred_label)
+    matrix = confusion_matrix(true_label, pred_label)
     end = time.time()
     print('Testing Time: {:.4f}'.format(end-start))
-    return predicted_test
+    return accuracy, auc, matrix
 
-def train_model(model, model_name, train_loader, val_loader, optimizer, criterion, scheduler, device, start_epoch, num_epochs, train_losses, valid_losses, empty_cache=False):
-    for epoch in range(start_epoch, num_epochs):
+def train_model(model, model_name, train_loader, val_loader, optimizer, criterion, scheduler, device, num_epochs, empty_cache=True):
+    train_losses = []
+    valid_losses = []
+    train_accuracy = []
+    valid_accuracy = []
+    
+    for epoch in range(num_epochs):
         print("Epoch: {}\tLearning Rate: {}".format(epoch+1, optimizer.param_groups[0]['lr']))
         
         train_loss, train_acc = train(model, train_loader, optimizer, criterion, device, epoch, empty_cache)
         print('Epoch: {}\tTrain Loss: {:.5f}\tTrain Accuracy: {:.5f}'.format(epoch+1, train_loss, train_acc))
         train_losses.append(train_loss)
+        train_accuracy.append(train_acc)
         
         val_loss, val_acc = valid(model, val_loader, criterion, device, epoch, empty_cache)
         print('Epoch: {}\tVal Loss: {:.5f}\tVal Accuracy: {:.5f}'.format(epoch+1, val_loss, val_acc))
         valid_losses.append(val_loss)
+        valid_accuracy.append(val_acc)
         
         scheduler.step(val_loss)
     
-    return train_losses, valid_losses
+    return train_losses, train_accuracy, valid_losses, valid_accuracy
 
-def training_plot(a, b):
+def training_plot(a, b, name, graph_type):
     plt.figure(1)
-    plt.plot(a, 'b', label="train")
-    plt.plot(b, 'g', label="valid")
-    plt.title('Training/Valid Loss')
+    plt.plot(range(1, len(a)+1), a, 'b', label="train")
+    plt.plot(range(1, len(b)+1), b, 'g', label="valid")
+    plt.title('Training/Valid {}'.format(graph_type))
     plt.legend()
-    plt.savefig('Loss Plot.png')
+    plt.savefig('{}_{}_plot.png'.format(name, graph_type.lower()))
     plt.show()
